@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Play, Pause, Volume2, Maximize2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Play } from "lucide-react";
 
 const description = [
   {
@@ -8,7 +8,7 @@ const description = [
   },
   {
     title: "Easy to operate ?:",
-    text: "Attach the spill tray and your chosen attachment to theFOXMO 2-in-1 Coconut Scraper and Citrus Juicer, select the speed, and press the soft-touch button to kickstart the appliance for swift and effective scraping or juicing.",
+    text: "Attach the spill tray and your chosen attachment to the FOXMO 2-in-1 Coconut Scraper and Citrus Juicer, select the speed, and press the soft-touch button to kickstart the appliance for swift and effective scraping or juicing.",
   },
   {
     title: "200W High Torque Copper Motor:",
@@ -38,7 +38,6 @@ const description = [
     title: "Cooling Fan for Ventilation:",
     text: "Prevents the motor from overheating, ensuring the appliance's longevity and safe operation.",
   },
-  
 ];
 
 const specifications = [
@@ -71,8 +70,10 @@ const specifications = [
 
 function ProductDetails() {
   const [activeTab, setActiveTab] = useState("description");
+  const [isVisible, setIsVisible] = useState(false);
+  const [tabReady, setTabReady] = useState(false);
+  const sectionRef = useRef(null);
 
-  // Replace with your actual YouTube video embed URL
   const videos = [
     {
       id: 1,
@@ -92,33 +93,84 @@ function ProductDetails() {
     { id: "video", label: "Video" },
   ];
 
+  // Scroll செய்து இந்த section-க்கு வரும்போது open ஆகும்
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          setTabReady(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Tab மாற்றும்போது smooth re-trigger animation
+  const handleTabChange = (tabId) => {
+    if (tabId === activeTab) return;
+    setTabReady(false);
+    setActiveTab(tabId);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTabReady(true);
+      });
+    });
+  };
+
   return (
     <section
       id="specifications"
-      className="w-full bg-white py-12 sm:py-16 lg:py-20 border-t border-gray-100"
+      ref={sectionRef}
+      className="w-full bg-white py-12 sm:py-16 lg:py-20 border-t border-gray-100 overflow-hidden"
     >
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-1">
         {/* ================= TABS ================= */}
-        <div className="border-b border-gray-200 overflow-x-auto no-scrollbar">
+        <div
+          className={`
+            border-b border-gray-200 overflow-x-auto no-scrollbar
+            transition-all duration-700 ease-out
+            ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+            }
+          `}
+        >
           <div className="flex items-center justify-start sm:justify-center gap-1 sm:gap-8 min-w-max">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative px-4 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-base font-medium transition-all duration-300 whitespace-nowrap cursor-pointer ${
-                  activeTab === tab.id
-                    ? "text-[#e62e2d] font-semibold"
-                    : "text-gray-600 hover:text-[#e62e2d]"
-                }`}
-              >
-                {tab.label}
+            {tabs.map((tab) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`relative px-4 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-base font-medium transition-all duration-300 whitespace-nowrap cursor-pointer ${
+                    isSelected
+                      ? "text-[#e62e2d] font-semibold"
+                      : "text-gray-600 hover:text-[#e62e2d]"
+                  }`}
+                >
+                  {tab.label}
 
-                {activeTab === tab.id && (
-                  <span className="absolute bottom-0 left-0 w-full h-[2.5px] bg-[#e62e2d] rounded-t-full" />
-                )}
-              </button>
-            ))}
+                  {/* Animated Active Tab Underline */}
+                  <span
+                    className={`
+                      absolute bottom-0 left-1/2 -translate-x-1/2 h-[2.5px] bg-[#e62e2d] rounded-t-full
+                      transition-all duration-300 ease-out
+                      ${isSelected ? "w-full opacity-100" : "w-0 opacity-0"}
+                    `}
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -126,16 +178,39 @@ function ProductDetails() {
         <div className="pt-6 sm:pt-10">
           {/* DESCRIPTION */}
           {activeTab === "description" && (
-            <div className="animate-in fade-in duration-300 bg-[#fafafa] border border-gray-200/80 rounded-2xl p-4 sm:p-7 lg:p-8">
+            <div
+              className={`
+                bg-[#fafafa] border border-gray-200/80 rounded-2xl p-4 sm:p-7 lg:p-8
+                transition-all duration-500 ease-out
+                ${
+                  tabReady
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }
+              `}
+            >
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5">
                 {description.map((item, index) => (
                   <li
                     key={index}
-                    className={`flex items-start gap-3 bg-white p-4 sm:p-5 rounded-xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] text-xs sm:text-[15px] text-gray-700 leading-relaxed ${
-                      !item.title
-                        ? "md:col-span-2 bg-amber-50/60 border-amber-200/70 text-amber-950"
-                        : ""
-                    }`}
+                    style={{ transitionDelay: `${index * 60}ms` }}
+                    className={`
+                      flex items-start gap-3 bg-white p-4 sm:p-5 rounded-xl
+                      border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]
+                      hover:shadow-md hover:border-red-100 hover:-translate-y-0.5
+                      text-xs sm:text-[15px] text-gray-700 leading-relaxed
+                      transition-all duration-500 ease-out
+                      ${
+                        !item.title
+                          ? "md:col-span-2 bg-amber-50/60 border-amber-200/70 text-amber-950"
+                          : ""
+                      }
+                      ${
+                        tabReady
+                          ? "opacity-100 translate-y-0"
+                          : "opacity-0 translate-y-5"
+                      }
+                    `}
                   >
                     <span
                       className={`mt-2 w-2 h-2 rounded-full shrink-0 ${
@@ -159,14 +234,33 @@ function ProductDetails() {
 
           {/* SPECIFICATION */}
           {activeTab === "specification" && (
-            <div className="animate-in fade-in duration-300 rounded-2xl border border-gray-200 overflow-hidden shadow-xs">
+            <div
+              className={`
+                rounded-2xl border border-gray-200 overflow-hidden shadow-xs
+                transition-all duration-500 ease-out
+                ${
+                  tabReady
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }
+              `}
+            >
               <div className="divide-y divide-gray-200">
                 {specifications.map((item, index) => (
                   <div
                     key={index}
-                    className={`grid grid-cols-1 sm:grid-cols-[220px_1fr] md:grid-cols-[300px_1fr] transition-colors ${
-                      index % 2 === 0 ? "bg-gray-50/70" : "bg-white"
-                    } hover:bg-red-50/20`}
+                    style={{ transitionDelay: `${index * 70}ms` }}
+                    className={`
+                      grid grid-cols-1 sm:grid-cols-[220px_1fr] md:grid-cols-[300px_1fr]
+                      transition-all duration-500 ease-out
+                      ${index % 2 === 0 ? "bg-gray-50/70" : "bg-white"}
+                      hover:bg-red-50/20
+                      ${
+                        tabReady
+                          ? "opacity-100 translate-x-0"
+                          : "opacity-0 -translate-x-4"
+                      }
+                    `}
                   >
                     <div className="px-4 sm:px-6 py-3 sm:py-5 text-xs sm:text-[15px] font-semibold text-gray-900 border-b sm:border-b-0 sm:border-r border-gray-200 bg-gray-100/50 sm:bg-transparent">
                       {item.label}
@@ -183,7 +277,16 @@ function ProductDetails() {
 
           {/* VIDEO TAB */}
           {activeTab === "video" && (
-            <div className="animate-in fade-in duration-300">
+            <div
+              className={`
+                transition-all duration-500 ease-out
+                ${
+                  tabReady
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-6"
+                }
+              `}
+            >
               <div className="text-center mb-7 sm:mb-10">
                 <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[2px] text-[#e62e2d]">
                   Watch & Explore
@@ -196,10 +299,20 @@ function ProductDetails() {
 
               {/* TWO VIDEO GRID */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">
-                {videos.map((video) => (
+                {videos.map((video, index) => (
                   <div
                     key={video.id}
-                    className="group bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300"
+                    style={{ transitionDelay: `${index * 150}ms` }}
+                    className={`
+                      group bg-white rounded-2xl overflow-hidden border border-gray-200
+                      shadow-sm hover:shadow-xl hover:-translate-y-1
+                      transition-all duration-500 ease-out
+                      ${
+                        tabReady
+                          ? "opacity-100 translate-y-0 scale-100"
+                          : "opacity-0 translate-y-8 scale-[0.98]"
+                      }
+                    `}
                   >
                     {/* Video Player */}
                     <div className="relative w-full aspect-video bg-black">
@@ -216,7 +329,7 @@ function ProductDetails() {
                     {/* Video Details */}
                     <div className="p-4 sm:p-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-red-50 flex items-center justify-center text-[#e62e2d] shrink-0">
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-red-50 group-hover:bg-[#e62e2d] group-hover:text-white flex items-center justify-center text-[#e62e2d] shrink-0 transition-colors duration-300">
                           <Play size={18} fill="currentColor" />
                         </div>
 
@@ -226,7 +339,7 @@ function ProductDetails() {
                           </h4>
 
                           <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">
-                           FOXMO Product Video
+                            FOXMO Product Video
                           </p>
                         </div>
                       </div>

@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ShoppingBag,
   ShoppingCart,
   Star,
-  CheckCircle2,
   Check,
   ArrowUpRight,
 } from "lucide-react";
@@ -78,20 +77,61 @@ const products = [
   },
 ];
 
-function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
+function ProductCard({
+  product,
+  index,
+  isVisible,
+  onViewDetails,
+  onAddToCart,
+  onBuyNow,
+}) {
   const [selectedImg, setSelectedImg] = useState(0);
   const [added, setAdded] = useState(false);
+  const [imgSwitching, setImgSwitching] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const savings = product.originalPrice - product.price;
-  const [quantity, setQuantity] = useState(2);
+
+  // Card ஒன்றன்பின் ஒன்றாக வர delay (150ms, 300ms, 450ms)
+  const delayClass =
+    index === 0
+      ? "delay-150"
+      : index === 1
+      ? "delay-300"
+      : "delay-[450ms]";
+
+  const handleImgChange = (idx) => {
+    if (idx === selectedImg) return;
+    setImgSwitching(true);
+    setTimeout(() => {
+      setSelectedImg(idx);
+      setImgSwitching(false);
+    }, 120);
+  };
+
   const handleAddClick = () => {
-    onAddToCart?.(product);
+    onAddToCart?.({ ...product, quantity });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
 
   return (
-    <div className="group flex flex-col bg-white rounded-2xl sm:rounded-3xl border border-gray-200/90 shadow-[0_6px_24px_rgba(0,0,0,0.04)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.09)] hover:border-gray-300 transition-all duration-300 overflow-hidden">
+    <div
+      className={`
+        group flex flex-col bg-white rounded-2xl sm:rounded-3xl
+        border border-gray-200/90
+        shadow-[0_6px_24px_rgba(0,0,0,0.04)]
+        hover:shadow-[0_18px_40px_rgba(0,0,0,0.09)]
+        hover:-translate-y-1.5 hover:border-gray-300
+        transition-all duration-700 ease-out overflow-hidden
+        ${delayClass}
+        ${
+          isVisible
+            ? "opacity-100 translate-y-0 scale-100"
+            : "opacity-0 translate-y-10 scale-[0.97]"
+        }
+      `}
+    >
       {/* Top Image Stage - Uniform Clean Light Gray Background */}
       <div className="relative h-[250px] sm:h-[300px] lg:h-[320px] bg-[#f6f7f9] p-4 sm:p-5 pb-14 flex items-center justify-center overflow-hidden border-b border-gray-100">
         {/* Top Right Discount Pill */}
@@ -99,12 +139,16 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
           {product.discount}
         </span>
 
-        {/* Main Product Image */}
+        {/* Main Product Image with Smooth Thumbnail Crossfade */}
         <div className="w-full h-full flex items-center justify-center">
           <img
             src={product.images[selectedImg]}
             alt={product.name}
-            className="max-h-full max-w-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-500 ease-out"
+            className={`
+              max-h-full max-w-full object-contain rounded-xl
+              group-hover:scale-105 transition-all duration-300 ease-out
+              ${imgSwitching ? "opacity-0 scale-95" : "opacity-100 scale-100"}
+            `}
           />
         </div>
 
@@ -115,8 +159,8 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
               <button
                 key={idx}
                 type="button"
-                onClick={() => setSelectedImg(idx)}
-                className={`w-6 h-6 sm:w-7 sm:h-7 shrink-0 rounded-lg overflow-hidden border transition-all cursor-pointer ${
+                onClick={() => handleImgChange(idx)}
+                className={`w-6 h-6 sm:w-7 sm:h-7 shrink-0 rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer ${
                   selectedImg === idx
                     ? "ring-2 ring-[#e62e2d] border-white scale-105 opacity-100"
                     : "border-gray-200 opacity-60 hover:opacity-100"
@@ -151,7 +195,7 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
           </div>
 
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             In Stock
           </span>
         </div>
@@ -168,7 +212,7 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
             type="button"
             onClick={() => onViewDetails(product)}
             title="View Specifications"
-            className="p-1.5 sm:p-2 rounded-full text-gray-400 hover:text-[#e62e2d] hover:bg-red-50 transition-colors shrink-0 cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-full text-gray-400 hover:text-[#e62e2d] hover:bg-red-50 hover:rotate-12 transition-all duration-200 shrink-0 cursor-pointer"
           >
             <ArrowUpRight size={18} />
           </button>
@@ -199,8 +243,9 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
 
             <div className="flex items-center gap-1.5 sm:gap-2 border border-gray-200 rounded-md px-1 sm:px-1.5 py-0.5 sm:py-1 shrink-0">
               <button
+                type="button"
                 onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded transition"
+                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 hover:bg-gray-100 active:scale-90 rounded transition cursor-pointer"
               >
                 -
               </button>
@@ -210,8 +255,9 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
               </span>
 
               <button
+                type="button"
                 onClick={() => setQuantity((prev) => prev + 1)}
-                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded transition"
+                className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 hover:bg-gray-100 active:scale-90 rounded transition cursor-pointer"
               >
                 +
               </button>
@@ -223,7 +269,7 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
             <button
               type="button"
               onClick={handleAddClick}
-              className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
+              className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 active:scale-[0.97] cursor-pointer ${
                 added
                   ? "border-emerald-600 bg-emerald-50 text-emerald-700"
                   : "border-gray-300 hover:border-gray-900 bg-white hover:bg-gray-50 text-gray-900"
@@ -245,9 +291,11 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
             <button
               type="button"
               onClick={() =>
-                onBuyNow ? onBuyNow(product) : onAddToCart?.(product)
+                onBuyNow
+                  ? onBuyNow({ ...product, quantity })
+                  : onAddToCart?.({ ...product, quantity })
               }
-              className="py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 bg-[#e62e2d] hover:bg-[#cc2221] text-white shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+              className="py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 bg-[#e62e2d] hover:bg-[#cc2221] text-white shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.97] cursor-pointer"
             >
               <ShoppingBag size={16} />
               Buy Now
@@ -260,6 +308,28 @@ function ProductCard({ product, onViewDetails, onAddToCart, onBuyNow }) {
 }
 
 function ProductSection({ onAddToCart, onBuyNow }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+
+  // User இந்த section-க்கு scroll பண்ணும்போது animation open ஆகும்
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const handleViewDetails = () => {
     document
       .getElementById("specifications")
@@ -269,19 +339,38 @@ function ProductSection({ onAddToCart, onBuyNow }) {
   return (
     <section
       id="product-details"
-      className="bg-white py-12 sm:py-16 lg:py-20"
+      ref={sectionRef}
+      className="bg-white py-12 sm:py-16 lg:py-20 overflow-hidden"
     >
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-1">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+        {/* Section Header - Smooth Fade & Slide Up */}
+        <div
+          className={`
+            text-center max-w-2xl mx-auto mb-8 sm:mb-12
+            transition-all duration-700 ease-out
+            ${
+              isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-7"
+            }
+          `}
+        >
           <div className="flex items-center justify-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
-            <span className="w-7 sm:w-10 h-[2px] bg-[#e62e2d]" />
+            <span
+              className={`h-[2px] bg-[#e62e2d] transition-all duration-700 delay-200 ${
+                isVisible ? "w-7 sm:w-10" : "w-0"
+              }`}
+            />
 
             <span className="text-[#e62e2d] text-xs sm:text-sm font-bold uppercase tracking-[2.5px] sm:tracking-[3px]">
               Our Products
             </span>
 
-            <span className="w-7 sm:w-10 h-[2px] bg-[#e62e2d]" />
+            <span
+              className={`h-[2px] bg-[#e62e2d] transition-all duration-700 delay-200 ${
+                isVisible ? "w-7 sm:w-10" : "w-0"
+              }`}
+            />
           </div>
 
           <p className="text-gray-500 text-xs sm:text-sm md:text-base mt-0.5 leading-relaxed">
@@ -289,11 +378,13 @@ function ProductSection({ onAddToCart, onBuyNow }) {
           </p>
         </div>
 
-        {/* Product Grid */}
+        {/* Product Grid - Staggered Card Reveal */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7">
-          {products.map((product) => (
+          {products.map((product, index) => (
             <ProductCard
               key={product.id}
+              index={index}
+              isVisible={isVisible}
               product={product}
               onViewDetails={handleViewDetails}
               onAddToCart={onAddToCart}
