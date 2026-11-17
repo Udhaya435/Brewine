@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import {
   ShoppingBag,
   ShoppingCart,
-  Star,
   Check,
-  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 // Yellow Edition Images
@@ -28,11 +28,12 @@ import g01 from "../../assets/Images/Products/Gray/G01.jpeg";
 import g02 from "../../assets/Images/Products/Gray/G02.jpeg";
 import g03 from "../../assets/Images/Products/Gray/G03.jpeg";
 import g04 from "../../assets/Images/Products/Gray/G04.jpeg";
+import g05 from "../../assets/Images/Products/Gray/G04.jpeg";
 
 const products = [
   {
     id: 1,
-    name: "Coconut Scraper",
+    name: "Coconut Scraper & Citrus Juicer",
     colorLabel: "Sunshine Yellow",
     colorDot: "bg-[#f5b800]",
     badge: "Bestseller",
@@ -47,7 +48,7 @@ const products = [
   },
   {
     id: 2,
-    name: "Citrus Juicer",
+    name: "Coconut Scraper & Citrus Juicer",
     colorLabel: "Crimson Red",
     colorDot: "bg-[#e62e2d]",
     badge: "Chef's Choice",
@@ -62,12 +63,12 @@ const products = [
   },
   {
     id: 3,
-    name: "2-in-1 Kitchen Solution",
+    name: "Coconut Scraper & Citrus Juicer",
     colorLabel: "Graphite Gray",
     colorDot: "bg-[#4b5563]",
     badge: "2-in-1 Combo",
     tagline: "Complete coconut scraper & citrus juicer combo pack",
-    images: [g01, g02, g03, g04],
+    images: [g01, g02, g03, g04,g05],
     rating: "5.0",
     reviews: 215,
     price: 2899,
@@ -81,18 +82,17 @@ function ProductCard({
   product,
   index,
   isVisible,
-  onViewDetails,
+  isInCart,
   onAddToCart,
   onBuyNow,
 }) {
   const [selectedImg, setSelectedImg] = useState(0);
-  const [added, setAdded] = useState(false);
   const [imgSwitching, setImgSwitching] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [isHovered, setIsHovered] = useState(false);
 
   const savings = product.originalPrice - product.price;
 
-  // Card ஒன்றன்பின் ஒன்றாக வர delay (150ms, 300ms, 450ms)
   const delayClass =
     index === 0
       ? "delay-150"
@@ -100,23 +100,45 @@ function ProductCard({
       ? "delay-300"
       : "delay-[450ms]";
 
-  const handleImgChange = (idx) => {
-    if (idx === selectedImg) return;
+  const changeImageSmoothly = (newIdx) => {
     setImgSwitching(true);
     setTimeout(() => {
-      setSelectedImg(idx);
+      setSelectedImg(newIdx);
       setImgSwitching(false);
     }, 120);
   };
 
-  const handleAddClick = () => {
-    onAddToCart?.({ ...product, quantity });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+  useEffect(() => {
+    if (!isHovered || product.images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setImgSwitching(true);
+      setTimeout(() => {
+        setSelectedImg((prev) => (prev + 1) % product.images.length);
+        setImgSwitching(false);
+      }, 120);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isHovered, product.images.length]);
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    const prevIdx =
+      (selectedImg - 1 + product.images.length) % product.images.length;
+    changeImageSmoothly(prevIdx);
+  };
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    const nextIdx = (selectedImg + 1) % product.images.length;
+    changeImageSmoothly(nextIdx);
   };
 
   return (
     <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`
         group flex flex-col bg-white rounded-2xl sm:rounded-3xl
         border border-gray-200/90
@@ -132,14 +154,23 @@ function ProductCard({
         }
       `}
     >
-      {/* Top Image Stage - Uniform Clean Light Gray Background */}
-      <div className="relative h-[250px] sm:h-[300px] lg:h-[320px] bg-[#f6f7f9] p-4 sm:p-5 pb-14 flex items-center justify-center overflow-hidden border-b border-gray-100">
-        {/* Top Right Discount Pill */}
+      {/* Top Image Stage */}
+      <div className="relative h-[250px] sm:h-[300px] lg:h-[320px] bg-[#f6f7f9] p-4 sm:p-6 flex items-center justify-center overflow-hidden border-b border-gray-100">
         <span className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-emerald-600 text-white text-[10px] sm:text-[11px] font-extrabold tracking-wide px-2.5 sm:px-3 py-1 rounded-full shadow-xs">
           {product.discount}
         </span>
 
-        {/* Main Product Image with Smooth Thumbnail Crossfade */}
+        {product.images.length > 1 && (
+          <button
+            type="button"
+            onClick={handlePrevImage}
+            aria-label="Previous image"
+            className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md border border-gray-200/80 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
+
         <div className="w-full h-full flex items-center justify-center">
           <img
             src={product.images[selectedImg]}
@@ -152,27 +183,28 @@ function ProductCard({
           />
         </div>
 
-        {/* Mini Thumbnail Switcher */}
         {product.images.length > 1 && (
-          <div className="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-1.5 bg-white/95 backdrop-blur-md px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200/80 max-w-[92%] overflow-x-auto">
-            {product.images.map((img, idx) => (
-              <button
+          <button
+            type="button"
+            onClick={handleNextImage}
+            aria-label="Next image"
+            className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md border border-gray-200/80 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
+
+        {product.images.length > 1 && (
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1.5 pointer-events-none">
+            {product.images.map((_, idx) => (
+              <span
                 key={idx}
-                type="button"
-                onClick={() => handleImgChange(idx)}
-                className={`w-6 h-6 sm:w-7 sm:h-7 shrink-0 rounded-lg overflow-hidden border transition-all duration-200 cursor-pointer ${
+                className={`h-1.5 rounded-full transition-all duration-300 ${
                   selectedImg === idx
-                    ? "ring-2 ring-[#e62e2d] border-white scale-105 opacity-100"
-                    : "border-gray-200 opacity-60 hover:opacity-100"
+                    ? "w-4 bg-[#e62e2d]"
+                    : "w-1.5 bg-gray-300"
                 }`}
-                aria-label={`View ${product.name} image ${idx + 1}`}
-              >
-                <img
-                  src={img}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              </button>
+              />
             ))}
           </div>
         )}
@@ -180,42 +212,20 @@ function ProductCard({
 
       {/* Card Body */}
       <div className="flex flex-col flex-1 p-4 sm:p-6">
-        {/* Rating & Stock Row */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 sm:mb-3">
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center gap-1 bg-amber-50 border border-amber-200/70 px-2 py-0.5 rounded-md">
-              <Star size={13} className="fill-amber-400 text-amber-400" />
-              <span className="text-xs font-extrabold text-gray-900">
-                {product.rating}
-              </span>
-            </div>
-            <span className="text-xs text-gray-500 font-medium">
-              ({product.reviews} reviews)
-            </span>
+          <div>
+            <h3 className="text-lg sm:text-[20px] font-bold text-gray-800 tracking-tight">
+              {product.name}
+            </h3>
+            <p className="text-xs font-medium text-gray-500 mt-0.5">
+              {product.colorLabel}
+            </p>
           </div>
 
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             In Stock
           </span>
-        </div>
-
-        {/* Title & Subtitle */}
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <div>
-            <h3 className="text-lg sm:text-[20px] font-bold text-gray-800 tracking-tight">
-              {product.name}
-            </h3>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => onViewDetails(product)}
-            title="View Specifications"
-            className="p-1.5 sm:p-2 rounded-full text-gray-400 hover:text-[#e62e2d] hover:bg-red-50 hover:rotate-12 transition-all duration-200 shrink-0 cursor-pointer"
-          >
-            <ArrowUpRight size={18} />
-          </button>
         </div>
 
         {/* Bottom Pricing & CTA Section */}
@@ -241,6 +251,7 @@ function ProductCard({
               </div>
             </div>
 
+            {/* Quantity Selector */}
             <div className="flex items-center gap-1.5 sm:gap-2 border border-gray-200 rounded-md px-1 sm:px-1.5 py-0.5 sm:py-1 shrink-0">
               <button
                 type="button"
@@ -264,18 +275,18 @@ function ProductCard({
             </div>
           </div>
 
-          {/* Uniform Action Buttons */}
+          {/* Action Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
             <button
               type="button"
-              onClick={handleAddClick}
+              onClick={() => onAddToCart?.({ ...product, quantity })}
               className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 active:scale-[0.97] cursor-pointer ${
-                added
+                isInCart
                   ? "border-emerald-600 bg-emerald-50 text-emerald-700"
                   : "border-gray-300 hover:border-gray-900 bg-white hover:bg-gray-50 text-gray-900"
               }`}
             >
-              {added ? (
+              {isInCart ? (
                 <>
                   <Check size={16} />
                   Added
@@ -307,11 +318,10 @@ function ProductCard({
   );
 }
 
-function ProductSection({ onAddToCart, onBuyNow }) {
+function ProductSection({ cart = [], onAddToCart, onBuyNow }) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
 
-  // User இந்த section-க்கு scroll பண்ணும்போது animation open ஆகும்
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -330,12 +340,6 @@ function ProductSection({ onAddToCart, onBuyNow }) {
     return () => observer.disconnect();
   }, []);
 
-  const handleViewDetails = () => {
-    document
-      .getElementById("specifications")
-      ?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <section
       id="product-details"
@@ -343,7 +347,7 @@ function ProductSection({ onAddToCart, onBuyNow }) {
       className="bg-white py-12 sm:py-16 lg:py-20 overflow-hidden"
     >
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-1">
-        {/* Section Header - Smooth Fade & Slide Up */}
+        {/* Section Header */}
         <div
           className={`
             text-center max-w-2xl mx-auto mb-8 sm:mb-12
@@ -378,19 +382,27 @@ function ProductSection({ onAddToCart, onBuyNow }) {
           </p>
         </div>
 
-        {/* Product Grid - Staggered Card Reveal */}
+        {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7">
-          {products.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              index={index}
-              isVisible={isVisible}
-              product={product}
-              onViewDetails={handleViewDetails}
-              onAddToCart={onAddToCart}
-              onBuyNow={onBuyNow}
-            />
-          ))}
+          {products.map((product, index) => {
+            const isInCart = cart.some(
+              (item) =>
+                item.id === product.id &&
+                item.colorLabel === product.colorLabel
+            );
+
+            return (
+              <ProductCard
+                key={product.id}
+                index={index}
+                isVisible={isVisible}
+                isInCart={isInCart}
+                product={product}
+                onAddToCart={onAddToCart}
+                onBuyNow={onBuyNow}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

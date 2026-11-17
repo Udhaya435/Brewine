@@ -300,7 +300,7 @@ function Footer() {
         {/* Bottom Copyright & Policy Links */}
         <div className="pt-5 sm:pt-7 flex flex-col sm:flex-row items-center justify-between gap-3.5 sm:gap-5 text-center sm:text-left">
           <p className="text-[11px] text-gray-600">
-            Copyright © 2026 
+            Copyright © 2026 || FOXMO
           </p>
 
           <div className="flex flex-wrap justify-center sm:justify-end items-center gap-x-2.5 gap-y-1.5 sm:gap-3 text-[11px]">

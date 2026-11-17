@@ -81,7 +81,7 @@ function Navbar({ cartCount = 0, onOpenCart }) {
           {/* Account */}
           <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-[#c82333] transition">
             <UserCircle size={21} className="shrink-0" />
-            <span>Account</span>
+            
           </button>
 
           {/* Cart */}

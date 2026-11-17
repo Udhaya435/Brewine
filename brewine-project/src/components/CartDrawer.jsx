@@ -1,37 +1,28 @@
-import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+import { X, Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 
-function CartDrawer({ isOpen, onClose, cart, onUpdateQty, onRemove }) {
+function CartDrawer({
+  isOpen,
+  onClose,
+  cart,
+  onUpdateQuantity,
+  onRemoveItem,
+}) {
   if (!isOpen) return null;
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-
-  const handleWhatsAppCheckout = () => {
-    const itemsText = cart
-      .map(
-        (item, idx) =>
-          `${idx + 1}. ${item.name} (x${item.qty}) - ₹${(
-            item.price * item.qty
-          ).toLocaleString("en-IN")}`
-      )
-      .join("%0A");
-
-    const message = `Hello Brewine Team! I would like to place an order:%0A%0A${itemsText}%0A%0A*Total: ₹${subtotal.toLocaleString(
-      "en-IN"
-    )}*`;
-
-    window.open(`https://wa.me/917868999000?text=${message}`, "_blank");
-  };
+  const totalAmount = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs">
-      <div className="w-full max-w-md bg-white h-full flex flex-col shadow-2xl">
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+      <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between">
+        {/* Cart Header */}
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShoppingBag size={20} className="text-[#c82333]" />
-            <h2 className="text-base font-bold text-gray-800">
-              Your Cart ({cart.reduce((acc, i) => acc + i.qty, 0)})
+            <ShoppingBag className="text-[#e62e2d]" size={22} />
+            <h2 className="text-lg font-bold text-gray-900">
+              Your Cart ({cart.length})
             </h2>
           </div>
           <button
@@ -42,62 +33,77 @@ function CartDrawer({ isOpen, onClose, cart, onUpdateQty, onRemove }) {
           </button>
         </div>
 
-        {/* Cart Items */}
+        {/* Cart Items List */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center text-gray-500">
-              <ShoppingBag size={48} className="text-gray-300 mb-3" />
-              <p className="text-sm font-semibold">Your cart is empty</p>
-              <p className="text-xs mt-1">
-                Add espresso machines or grinders to get started!
+            <div className="h-full flex flex-col items-center justify-center text-center text-gray-400">
+              <ShoppingBag size={48} className="mb-3 opacity-30" />
+              <p className="text-base font-medium text-gray-600">
+                Your cart is empty
               </p>
+              <p className="text-xs mt-1">Add products to see them here.</p>
             </div>
           ) : (
             cart.map((item) => (
               <div
-                key={item.id}
-                className="flex gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50"
+                key={`${item.id}-${item.colorLabel}`}
+                className="flex gap-4 p-3 rounded-2xl border border-gray-100 bg-gray-50/60"
               >
                 <img
-                  src={item.image}
+                  src={item.images?.[0]}
                   alt={item.name}
-                  className="w-20 h-20 rounded-lg object-cover bg-white border border-gray-200 shrink-0"
+                  className="w-20 h-20 object-contain bg-white rounded-xl p-2 border border-gray-100 shrink-0"
                 />
 
-                <div className="flex-1">
-                  <h4 className="text-xs font-bold text-gray-800 line-clamp-2">
-                    {item.name}
-                  </h4>
-                  <p className="text-sm font-extrabold text-[#c82333] mt-1">
-                    ₹{item.price.toLocaleString("en-IN")}
-                  </p>
-
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center border border-gray-200 rounded-lg bg-white">
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="text-sm font-bold text-gray-900 leading-snug">
+                        {item.name}
+                      </h4>
                       <button
-                        onClick={() => onUpdateQty(item.id, item.qty - 1)}
-                        className="p-1 text-gray-600 hover:text-black cursor-pointer"
+                        onClick={() =>
+                          onRemoveItem(item.id, item.colorLabel)
+                        }
+                        className="text-gray-400 hover:text-red-600 transition cursor-pointer"
+                        title="Remove item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    {item.colorLabel && (
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Color: {item.colorLabel}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="text-sm font-extrabold text-gray-900">
+                      ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                    </span>
+
+                    <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                      <button
+                        onClick={() =>
+                          onUpdateQuantity(item.id, item.colorLabel, -1)
+                        }
+                        className="text-gray-600 hover:text-black cursor-pointer"
                       >
                         <Minus size={14} />
                       </button>
-                      <span className="px-2.5 text-xs font-bold">
-                        {item.qty}
+                      <span className="text-xs font-bold min-w-4 text-center">
+                        {item.quantity}
                       </span>
                       <button
-                        onClick={() => onUpdateQty(item.id, item.qty + 1)}
-                        className="p-1 text-gray-600 hover:text-black cursor-pointer"
+                        onClick={() =>
+                          onUpdateQuantity(item.id, item.colorLabel, 1)
+                        }
+                        className="text-gray-600 hover:text-black cursor-pointer"
                       >
                         <Plus size={14} />
                       </button>
                     </div>
-
-                    <button
-                      onClick={() => onRemove(item.id)}
-                      className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
-                      aria-label="Remove item"
-                    >
-                      <Trash2 size={15} />
-                    </button>
                   </div>
                 </div>
               </div>
@@ -105,24 +111,21 @@ function CartDrawer({ isOpen, onClose, cart, onUpdateQty, onRemove }) {
           )}
         </div>
 
-        {/* Footer */}
+        {/* Cart Footer */}
         {cart.length > 0 && (
-          <div className="p-5 border-t border-gray-200 bg-gray-50 space-y-3">
+          <div className="p-5 border-t border-gray-100 bg-white space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 font-medium">
-                Subtotal (Incl. GST)
-              </span>
-              <span className="text-lg font-extrabold text-gray-900">
-                ₹{subtotal.toLocaleString("en-IN")}
+              <span className="text-gray-500 font-medium">Subtotal</span>
+              <span className="text-lg font-black text-gray-900">
+                ₹{totalAmount.toLocaleString("en-IN")}
               </span>
             </div>
-
             <button
-              onClick={handleWhatsAppCheckout}
-              className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition cursor-pointer"
+              type="button"
+              onClick={() => alert("Proceeding to Checkout!")}
+              className="w-full py-3.5 rounded-xl bg-[#e62e2d] hover:bg-[#cc2221] text-white font-bold text-sm shadow-md transition cursor-pointer"
             >
-              <FaWhatsapp size={18} />
-              <span>Order Now via WhatsApp</span>
+              Proceed to Checkout
             </button>
           </div>
         )}

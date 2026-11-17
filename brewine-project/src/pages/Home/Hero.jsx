@@ -1,28 +1,35 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import {
+
+  ArrowRight,
+  Nut,
+  Citrus,
+  Fan,
+  ShieldCheck,
+} from "lucide-react";
 import heroBg from "../../assets/Images/hero/heroig.png";
 
 const productFeatures = [
   {
-    icon: "🥥",
+    icon: Nut,
     name: "Coconut Scraper",
     desc: "Effortless grating",
     id: "features",
   },
   {
-    icon: "🍊",
+    icon: Citrus,
     name: "Citrus Juicer",
     desc: "Fresh extraction",
     id: "features",
   },
   {
-    icon: "🌬️",
+    icon: Fan,
     name: "Cooling Fan",
     desc: "Overheat protection",
     id: "features",
   },
   {
-    icon: "🔩",
+    icon: ShieldCheck,
     name: "Steel Blade",
     desc: "Food-grade SS304",
     id: "features",
@@ -62,7 +69,7 @@ function Hero() {
         sm:min-h-[700px]
         md:min-h-[calc(100svh-74px)]
         lg:min-h-[calc(100svh-74px)]
-        overflow-hidden bg-[#100b0d]
+        overflow-hidden bg-[#161214]
         flex flex-col justify-between
       "
     >
@@ -82,8 +89,8 @@ function Hero() {
             linear-gradient(
               90deg,
               rgba(15, 12, 11, 0.85) 0%,
-              rgba(15, 12, 11, 0.62) 50%,
-              rgba(15, 12, 11, 0.22) 100%
+              rgba(15, 12, 11, 0.62) 20%,
+              rgba(15, 12, 11, 0.22) 50%
             ),
             url(${heroBg})
           `,
@@ -110,10 +117,9 @@ function Hero() {
             font-black uppercase tracking-tight leading-[1.02]
             mt-1
             transition-all duration-700 ease-out delay-100
-            ${
-              isLoaded
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-7"
+            ${isLoaded
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-7"
             }
           `}
         >
@@ -152,10 +158,9 @@ function Hero() {
           className={`
             mt-3 sm:mt-4 flex flex-col items-center md:items-start
             transition-all duration-700 ease-out delay-[250ms]
-            ${
-              isLoaded
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-7"
+            ${isLoaded
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-7"
             }
           `}
         >
@@ -197,10 +202,9 @@ function Hero() {
             text-[11px] sm:text-sm
             font-medium text-white/90
             transition-all duration-700 ease-out delay-[400ms]
-            ${
-              isLoaded
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-7"
+            ${isLoaded
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-7"
             }
           `}
         >
@@ -226,10 +230,9 @@ function Hero() {
         <div
           className={`
             transition-all duration-700 ease-out delay-[550ms]
-            ${
-              isLoaded
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-7"
+            ${isLoaded
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-7"
             }
           `}
         >
@@ -264,10 +267,9 @@ function Hero() {
           max-w-4xl mx-auto
           mb-3 sm:mb-6
           transition-all duration-700 ease-out delay-700
-          ${
-            isLoaded
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-10"
+          ${isLoaded
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-10"
           }
         `}
       >
@@ -293,29 +295,19 @@ function Hero() {
             </span>
           </div>
 
-          {/* Previous Button */}
-          <button
-            onClick={() => setStart(Math.max(0, start - 1))}
-            disabled={start === 0}
-            className="
-              p-1 sm:p-1.5 rounded-full
-              text-gray-500 hover:text-black
-              hover:bg-gray-100 disabled:opacity-25
-              shrink-0 cursor-pointer transition
-            "
-            aria-label="Previous features"
-          >
-            <ChevronLeft size={18} />
-          </button>
+
 
           {/* Feature Tabs */}
+
           <div className="grid grid-cols-2 sm:grid-cols-4 flex-1 gap-1.5 sm:gap-2.5 lg:gap-3">
             {visibleFeatures.map((item) => {
               const isActive = selectedTab === item.name;
+              const Icon = item.icon;
 
               return (
                 <button
                   key={item.name}
+                  type="button"
                   onClick={() => {
                     setSelectedTab(item.name);
                     document
@@ -323,26 +315,30 @@ function Hero() {
                       ?.scrollIntoView({ behavior: "smooth" });
                   }}
                   className={`
-                    flex items-center gap-1.5 sm:gap-2.5
-                    px-2 sm:px-3 py-1.5 sm:py-2
-                    rounded-lg sm:rounded-xl
-                    text-left transition-all duration-200
-                    cursor-pointer min-w-0
-                    ${
-                      isActive
-                        ? "bg-amber-50/90 ring-1 ring-[#ffad00] shadow-sm scale-[1.02]"
-                        : "hover:bg-gray-100/80"
+          flex items-center gap-1.5 sm:gap-2.5
+          px-2 sm:px-3 py-1.5 sm:py-2
+          rounded-lg sm:rounded-xl
+          text-left transition-all duration-200
+          cursor-pointer min-w-0
+          ${isActive
+                      ? "bg-amber-50/90 ring-1 ring-[#ffad00] shadow-sm scale-[1.02]"
+                      : "hover:bg-gray-100/80"
                     }
-                  `}
+        `}
                 >
-                  <span className="text-lg sm:text-xl lg:text-2xl leading-none shrink-0">
-                    {item.icon}
-                  </span>
+                  {/* Lucide Icon */}
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg
+          flex items-center justify-center shrink-0
+          ${isActive ? "bg-white text-[#e62e2d]" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    <Icon size={20} strokeWidth={1.8} />
+                  </div>
 
                   <div className="min-w-0">
                     <p className="text-[11px] sm:text-xs font-bold text-gray-900 truncate">
                       {item.name}
                     </p>
+
                     <p className="hidden lg:block text-[10px] text-gray-500 truncate">
                       {item.desc}
                     </p>
@@ -352,27 +348,8 @@ function Hero() {
             })}
           </div>
 
-          {/* Next Button */}
-          <button
-            onClick={() =>
-              setStart(
-                Math.min(
-                  productFeatures.length - visibleCount,
-                  start + 1
-                )
-              )
-            }
-            disabled={start >= productFeatures.length - visibleCount}
-            className="
-              p-1 sm:p-1.5 rounded-full
-              text-gray-500 hover:text-black
-              hover:bg-gray-100 disabled:opacity-25
-              shrink-0 cursor-pointer transition
-            "
-            aria-label="Next features"
-          >
-            <ChevronRight size={18} />
-          </button>
+
+
         </div>
       </div>
     </section>
