@@ -11,25 +11,35 @@ import {
 // Yellow Edition Images
 import y01 from "../../assets/Images/Products/Yollow/y01.png";
 import y02 from "../../assets/Images/Products/Yollow/y02.jpg";
-import y03 from "../../assets/Images/Products/Yollow/y03.jpg";
-import y04 from "../../assets/Images/Products/Yollow/y04.jpg";
-import y05 from "../../assets/Images/Products/Yollow/y05.jpg";
+import y03 from "../../assets/Images/Products/Yollow/y03.png";
+import y04 from "../../assets/Images/Products/Yollow/y04.png";
+import y05 from "../../assets/Images/Products/Yollow/y05.png";
 import y06 from "../../assets/Images/Products/Yollow/y06.png";
 
 // Red Edition Images
 import r01 from "../../assets/Images/Products/Red/r01.png";
-import r02 from "../../assets/Images/Products/Red/r02.jpeg";
-import r03 from "../../assets/Images/Products/Red/r03.jpeg";
-import r04 from "../../assets/Images/Products/Red/r04.jpeg";
+import r02 from "../../assets/Images/Products/Red/r02.png";
+import r03 from "../../assets/Images/Products/Red/r03.png";
+import r04 from "../../assets/Images/Products/Red/r04.png";
 import r05 from "../../assets/Images/Products/Red/r05.jpeg";
-import r06 from "../../assets/Images/Products/Red/r06.jpeg";
+
 
 // Gray Edition Images
-import g01 from "../../assets/Images/Products/Gray/G01.jpeg";
-import g02 from "../../assets/Images/Products/Gray/G02.jpeg";
-import g03 from "../../assets/Images/Products/Gray/G03.jpeg";
-import g04 from "../../assets/Images/Products/Gray/G04.jpeg";
-import g05 from "../../assets/Images/Products/Gray/G04.jpeg";
+import g01 from "../../assets/Images/Products/Gray/G01.png";
+import g02 from "../../assets/Images/Products/Gray/G02.png";
+import g03 from "../../assets/Images/Products/Gray/G03.png";
+import g04 from "../../assets/Images/Products/Gray/G04.png";
+import g05 from "../../assets/Images/Products/Gray/G04.png";
+
+
+import b01 from "../../assets/Images/Products/Black/Black01.png";
+import b02 from "../../assets/Images/Products/Black/Black02.png";
+import b03 from "../../assets/Images/Products/Black/Black03.png";
+import b04 from "../../assets/Images/Products/Black/Black04.png";
+import b05 from "../../assets/Images/Products/Black/Black05.png";
+import b06 from "../../assets/Images/Products/Black/Black06.png";
+import b07 from "../../assets/Images/Products/Black/Black07.png";
+import b08 from "../../assets/Images/Products/Black/Black08.png";
 
 const products = [
   {
@@ -54,7 +64,7 @@ const products = [
     colorDot: "bg-[#e62e2d]",
     badge: "Chef's Choice",
     tagline: "Maximum juice extraction with zero peel bitterness",
-    images: [r01, r02, r03, r04, r05, r06],
+    images: [r01, r02, r03, r04, r05],
     rating: "4.8",
     reviews: 94,
     price: 2899,
@@ -70,6 +80,21 @@ const products = [
     badge: "2-in-1 Combo",
     tagline: "Complete coconut scraper & citrus juicer combo pack",
     images: [g01, g02, g03, g04, g05],
+    rating: "5.0",
+    reviews: 215,
+    price: 2899,
+    originalPrice: 3795,
+    discount: "24% OFF",
+    features: ["Dual Attachment System", "Space-Saving Design"],
+  },
+  {
+    id: 3,
+    name: "Coconut Scraper & Citrus Juicer",
+    colorLabel: "Black",
+    colorDot: "bg-[#4b5563]",
+    badge: "2-in-1 Combo",
+    tagline: "Complete coconut scraper & citrus juicer combo pack",
+    images: [b01,b02,b03,b04,b05,b06,b07,b08],
     rating: "5.0",
     reviews: 215,
     price: 2899,
