@@ -129,7 +129,7 @@ function ProductDetails() {
     <section
       id="specifications"
       ref={sectionRef}
-      className="w-full bg-white py-12 sm:py-16 lg:py-20 border-t border-gray-100 overflow-hidden"
+      className="w-full bg-white py-12 sm:py-16 lg:py-3 border-t border-gray-100 overflow-hidden"
     >
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-1">
         {/* ================= TABS ================= */}

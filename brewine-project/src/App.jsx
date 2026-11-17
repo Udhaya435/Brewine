@@ -5,12 +5,16 @@ import Footer from "./components/Footer";
 import ProductSection from "./pages/Home/ProductSection";
 import ProductDetails from "./pages/Home/ProductDetails";
 import CartDrawer from "./components/CartDrawer";
+import WishlistDrawer from "./components/WishlistDrawer";
 
 function App() {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // ஒருமுறை கிளிக் செய்தால் Add ஆகும், மறுமுறை கிளிக் செய்தால் Remove ஆகும்
+  const [wishlist, setWishlist] = useState([]);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+
+  // Cart Add / Remove Toggle
   const handleToggleCart = (product) => {
     setCart((prevCart) => {
       const exists = prevCart.some(
@@ -19,19 +23,17 @@ function App() {
       );
 
       if (exists) {
-        // ஏற்கனவே இருந்தால் Cart-லிருந்து நீக்கிவிடும்
         return prevCart.filter(
           (item) =>
             !(item.id === product.id && item.colorLabel === product.colorLabel)
         );
       }
 
-      // இல்லையென்றால் Cart-ல் சேர்க்கும்
       return [...prevCart, { ...product, quantity: product.quantity || 1 }];
     });
   };
 
-  // Buy Now கிளிக் செய்தால் Cart-ல் இல்லையென்றால் சேர்த்து Drawer-ஐ Open செய்யும்
+  // Buy Now
   const handleBuyNow = (productToBuy) => {
     setCart((prevCart) => {
       const existingIndex = prevCart.findIndex(
@@ -75,19 +77,81 @@ function App() {
     );
   };
 
+  // Wishlist Add / Remove Toggle
+  const handleToggleWishlist = (product) => {
+    setWishlist((prevWishlist) => {
+      const exists = prevWishlist.some(
+        (item) =>
+          item.id === product.id && item.colorLabel === product.colorLabel
+      );
+
+      if (exists) {
+        return prevWishlist.filter(
+          (item) =>
+            !(item.id === product.id && item.colorLabel === product.colorLabel)
+        );
+      }
+
+      return [...prevWishlist, product];
+    });
+  };
+
+  const handleRemoveFromWishlist = (id, colorLabel) => {
+    setWishlist((prev) =>
+      prev.filter(
+        (item) => !(item.id === id && item.colorLabel === colorLabel)
+      )
+    );
+  };
+
+  // Move to Cart -> Adds to Cart, Removes from Wishlist, Opens Your Cart Drawer
+  const handleMoveToCart = (product) => {
+    setCart((prevCart) => {
+      const existingIndex = prevCart.findIndex(
+        (item) =>
+          item.id === product.id && item.colorLabel === product.colorLabel
+      );
+
+      if (existingIndex > -1) {
+        const updated = [...prevCart];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + 1,
+        };
+        return updated;
+      }
+
+      return [...prevCart, { ...product, quantity: 1 }];
+    });
+
+    setWishlist((prev) =>
+      prev.filter(
+        (item) =>
+          !(item.id === product.id && item.colorLabel === product.colorLabel)
+      )
+    );
+
+    setIsWishlistOpen(false);
+    setIsCartOpen(true);
+  };
+
   return (
     <>
       <Navbar
         cartCount={cart.length}
+        wishlistCount={wishlist.length}
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenWishlist={() => setIsWishlistOpen(true)}
       />
 
       <main className="min-h-screen bg-gray-50">
         <Hero />
         <ProductSection
           cart={cart}
+          wishlist={wishlist}
           onAddToCart={handleToggleCart}
           onBuyNow={handleBuyNow}
+          onToggleWishlist={handleToggleWishlist}
         />
         <ProductDetails
           cart={cart}
@@ -104,6 +168,14 @@ function App() {
         cart={cart}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
+      />
+
+      <WishlistDrawer
+        isOpen={isWishlistOpen}
+        onClose={() => setIsWishlistOpen(false)}
+        wishlist={wishlist}
+        onRemoveFromWishlist={handleRemoveFromWishlist}
+        onMoveToCart={handleMoveToCart}
       />
     </>
   );

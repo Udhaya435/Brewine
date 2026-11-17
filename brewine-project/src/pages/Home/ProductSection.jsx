@@ -5,6 +5,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Heart,
 } from "lucide-react";
 
 // Yellow Edition Images
@@ -68,7 +69,7 @@ const products = [
     colorDot: "bg-[#4b5563]",
     badge: "2-in-1 Combo",
     tagline: "Complete coconut scraper & citrus juicer combo pack",
-    images: [g01, g02, g03, g04,g05],
+    images: [g01, g02, g03, g04, g05],
     rating: "5.0",
     reviews: 215,
     price: 2899,
@@ -83,8 +84,10 @@ function ProductCard({
   index,
   isVisible,
   isInCart,
+  isWishlisted,
   onAddToCart,
   onBuyNow,
+  onToggleWishlist,
 }) {
   const [selectedImg, setSelectedImg] = useState(0);
   const [imgSwitching, setImgSwitching] = useState(false);
@@ -123,6 +126,7 @@ function ProductCard({
   }, [isHovered, product.images.length]);
 
   const handlePrevImage = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const prevIdx =
       (selectedImg - 1 + product.images.length) % product.images.length;
@@ -130,9 +134,18 @@ function ProductCard({
   };
 
   const handleNextImage = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const nextIdx = (selectedImg + 1) % product.images.length;
     changeImageSmoothly(nextIdx);
+  };
+
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onToggleWishlist) {
+      onToggleWishlist(product);
+    }
   };
 
   return (
@@ -156,6 +169,24 @@ function ProductCard({
     >
       {/* Top Image Stage */}
       <div className="relative h-[250px] sm:h-[300px] lg:h-[320px] bg-[#f6f7f9] p-4 sm:p-6 flex items-center justify-center overflow-hidden border-b border-gray-100">
+        {/* Top-Left Wishlist Button */}
+        <button
+          type="button"
+          onClick={handleWishlistClick}
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-9 h-9 rounded-full bg-white/95 hover:bg-white shadow-sm border border-gray-200/80 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+        >
+          <Heart
+            size={18}
+            className={`transition-colors duration-200 ${
+              isWishlisted
+                ? "fill-[#e62e2d] text-[#e62e2d]"
+                : "text-gray-600 hover:text-[#e62e2d]"
+            }`}
+          />
+        </button>
+
+        {/* Top-Right Discount Badge */}
         <span className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-emerald-600 text-white text-[10px] sm:text-[11px] font-extrabold tracking-wide px-2.5 sm:px-3 py-1 rounded-full shadow-xs">
           {product.discount}
         </span>
@@ -255,7 +286,10 @@ function ProductCard({
             <div className="flex items-center gap-1.5 sm:gap-2 border border-gray-200 rounded-md px-1 sm:px-1.5 py-0.5 sm:py-1 shrink-0">
               <button
                 type="button"
-                onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => Math.max(1, prev - 1));
+                }}
                 className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 hover:bg-gray-100 active:scale-90 rounded transition cursor-pointer"
               >
                 -
@@ -267,7 +301,10 @@ function ProductCard({
 
               <button
                 type="button"
-                onClick={() => setQuantity((prev) => prev + 1)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuantity((prev) => prev + 1);
+                }}
                 className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 hover:bg-gray-100 active:scale-90 rounded transition cursor-pointer"
               >
                 +
@@ -279,7 +316,10 @@ function ProductCard({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
             <button
               type="button"
-              onClick={() => onAddToCart?.({ ...product, quantity })}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart?.({ ...product, quantity });
+              }}
               className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 active:scale-[0.97] cursor-pointer ${
                 isInCart
                   ? "border-emerald-600 bg-emerald-50 text-emerald-700"
@@ -301,11 +341,14 @@ function ProductCard({
 
             <button
               type="button"
-              onClick={() =>
-                onBuyNow
-                  ? onBuyNow({ ...product, quantity })
-                  : onAddToCart?.({ ...product, quantity })
-              }
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onBuyNow) {
+                  onBuyNow({ ...product, quantity });
+                } else {
+                  onAddToCart?.({ ...product, quantity });
+                }
+              }}
               className="py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 bg-[#e62e2d] hover:bg-[#cc2221] text-white shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.97] cursor-pointer"
             >
               <ShoppingBag size={16} />
@@ -318,7 +361,13 @@ function ProductCard({
   );
 }
 
-function ProductSection({ cart = [], onAddToCart, onBuyNow }) {
+function ProductSection({
+  cart = [],
+  wishlist = [],
+  onAddToCart,
+  onBuyNow,
+  onToggleWishlist,
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
 
@@ -391,15 +440,23 @@ function ProductSection({ cart = [], onAddToCart, onBuyNow }) {
                 item.colorLabel === product.colorLabel
             );
 
+            const isWishlisted = wishlist.some(
+              (item) =>
+                item.id === product.id &&
+                item.colorLabel === product.colorLabel
+            );
+
             return (
               <ProductCard
                 key={product.id}
                 index={index}
                 isVisible={isVisible}
                 isInCart={isInCart}
+                isWishlisted={isWishlisted}
                 product={product}
                 onAddToCart={onAddToCart}
                 onBuyNow={onBuyNow}
+                onToggleWishlist={onToggleWishlist}
               />
             );
           })}
