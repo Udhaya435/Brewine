@@ -7,7 +7,7 @@ import {
   Fan,
   ShieldCheck,
 } from "lucide-react";
-import heroBg from "../../assets/Images/hero/heroig.png";
+import heroBg from "../../assets/Images/hero/heroig.jpg";
 
 const productFeatures = [
   {
